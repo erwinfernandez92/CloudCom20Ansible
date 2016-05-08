@@ -1,0 +1,4 @@
+ - name: start couch
+   shell: /usr/local/etc/init.d/couchdb restart
+   args:
+      executable: /bin/bash

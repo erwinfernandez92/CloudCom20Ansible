@@ -1,0 +1,2 @@
+ - name: copy raw tweets database
+   copy: dest=/mnt/couchdb/raw_tweets.couch group=couchdb owner=couchdb mode=0664 src=raw_tweets.couch

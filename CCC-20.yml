@@ -1,0 +1,65 @@
+ - hosts: tweet_harvester
+   remote_user: debian
+   become: yes
+   become_method: sudo
+   tasks:
+    - include: install-couch.yml
+
+    - include: install-raw_tweets.yml
+
+    - include: start-couch.yml
+
+    - include: install-harvester.yml
+
+ - hosts: preprocessor
+   remote_user: debian
+   become: yes
+   become_method: sudo
+   tasks:
+    - include: install-couch.yml
+
+    - include: install-raw_tweets.yml
+
+    - include: install-tweets_polygons_relational.yml
+
+    - include: start-couch.yml
+
+    - name: replicate tweet harvesters
+      command: curl -X POST http://127.0.0.1:5984/_replicate -d '{"source":"{{ item }}/raw_tweets", "target":"raw_tweets", "continuous":true}'
+      with_inventory_hostnames: tweet_harvester
+
+    #install preprocessor
+
+
+ - hosts: webserver
+   remote_user: debian
+   become: yes
+   become_method: sudo
+   tasks:
+    - include: install-couch.yml
+
+    - include: install-tweets_polygons_relational.yml
+
+    - include: start-couch.yml
+
+    - name: replicate polygons
+      command: curl -X POST http://127.0.0.1:5984/_replicate -d '{"source":"{{ item }}/tweets_polygons_relational", "target":"tweets_polygons_relational", "continuous":true}'
+      with_inventory_hostnames: preprocessor
+
+    #install apache
+
+ #we're going to be pulling
+
+#start tweets harvesters
+
+#copy over shapes
+
+#copy over raw_tweets
+
+#start preprocessor
+
+#set replicator
+
+#start web
+
+#set replicator

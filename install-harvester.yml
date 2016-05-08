@@ -1,0 +1,29 @@
+ - name: install pip3
+   apt: name=python3-pip
+
+ - name: install unzip
+   apt: name=unzip
+   become: yes
+
+ - name: install venv
+   pip: name=virtualenv executable=pip3
+
+ - name: create directory for harvester
+   file: path=/etc/harvester-tempspace state=directory
+
+ - name: get harvester
+   get_url: url=https://github.com/erwinfernandez92/CloudCom20Harvest/archive/master.zip dest=/etc/harvester-tempspace/harvester.zip
+
+ - name: extract harvester
+   unarchive: src=/etc/harvester-tempspace/harvester.zip dest=/etc/harvester-tempspace copy=no
+
+ - name: venving
+   command: virtualenv venv
+   args:
+      chdir: /etc/harvester-tempspace/CloudCom20Harvest-master
+
+ - name: install requirements
+   pip: requirements=/etc/harvester-tempspace/CloudCom20Harvest-master/requirements.txt virtualenv=/etc/harvester-tempspace/CloudCom20Harvest-master/venv virtualenv_command=virtualenv 
+
+# actually run the harvester with what??
+

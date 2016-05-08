@@ -1,0 +1,132 @@
+#taken from https://forum.cozy.io/t/how-to-install-couchdb-manually-on-debian-jessie/1230
+ - name: get javascript library
+   apt: name=libmozjs185-1.0
+   become: yes
+
+ - name: get javascript headers
+   apt: name=libmozjs185-dev
+   become: yes
+
+#getting dependancies
+
+ - name: get erlang library
+   apt: name=erlang-nox
+   become: yes
+
+ - name: get erlang headers
+   apt: name=erlang-dev
+   become: yes
+
+ - name: get build-essential
+   apt: name=build-essential
+   become: yes
+
+ - name: get libnspr4
+   apt: name=libnspr4
+   become: yes
+
+ - name: get libnspr4-0d
+   apt: name=libnspr4-0d
+   become: yes
+
+ - name: get libnspr4-dev
+   apt: name=libnspr4-dev
+   become: yes
+
+ - name: get libcurl4-openssl-dev
+   apt: name=libcurl4-openssl-dev
+   become: yes
+
+ - name: get curl
+   apt: name=curl
+   become: yes
+
+ - name: get libicu-dev
+   apt: name=libicu-dev
+   become: yes
+
+#create account
+
+ - name: create couchdb account
+   user: name=couchdb
+   become: yes
+
+#creating some directories
+
+
+
+ - file: path=/usr/local/lib/couchdb state=directory owner=couchdb group=couchdb recurse=yes mode=0777
+   become: yes
+
+ - file: path=/usr/local/etc/couchdb state=directory owner=couchdb group=couchdb recurse=yes mode=0775
+   become: yes
+
+ - file: path=/usr/local/var state=directory owner=couchdb group=couchdb recurse=yes mode=0775
+   become: yes
+
+ - file: path=/usr/local/var/lib state=directory owner=couchdb group=couchdb recurse=yes mode=0775
+   become: yes
+
+ - file: path=/usr/local/var/lib/couchdb state=directory owner=couchdb group=couchdb recurse=yes mode=0775
+   become: yes
+
+ - file: path=/usr/local/var/run state=directory owner=couchdb group=couchdb recurse=yes mode=0775
+   become: yes
+
+ - file: path=/usr/local/var/run/couchdb state=directory owner=couchdb group=couchdb recurse=yes mode=0775
+   become: yes
+
+ - file: path=/mnt/couchdb state=directory owner=couchdb group=couchdb recurse=yes mode=0775
+   become: yes
+
+ - file: path=/var/lib/couchdb state=directory
+   become: yes
+
+#get and extract couchdb
+
+ - name: make couchdb temp folder
+   file: path=/etc/couchdb-tempspace state=directory
+
+ - name: get couchdb
+   get_url: url=http://apache.mirror.serversaustralia.com.au/couchdb/source/1.6.1/apache-couchdb-1.6.1.tar.gz dest=/etc/couchdb-tempspace/couchdb.tar.gz
+
+ - name: extract couchdb
+   unarchive: src=/etc/couchdb-tempspace/couchdb.tar.gz dest=/etc/couchdb-tempspace copy=no creates=/etc/couchdb-tempspace/apache-couchdb-1.6.1/configure 
+
+ - name: configure couchdb
+   shell: ./configure --prefix=/usr/local --with-js-lib=/usr/lib --with-js-include=/usr/include/mozjs --enable-init
+   args:
+      executable: /bin/bash
+      chdir: /etc/couchdb-tempspace/apache-couchdb-1.6.1
+
+ - name: make couchdb
+   shell: sudo make && sudo make install
+   args:
+      executable: /bin/bash
+      chdir: /etc/couchdb-tempspace/apache-couchdb-1.6.1
+
+#change couchdb settings
+
+ - name: change database location
+   ini_file: dest=/usr/local/etc/couchdb/local.ini
+      section=couchdb
+      option=database_dir
+      value=/mnt/couchdb
+
+ - name: change index location
+   ini_file: dest=/usr/local/etc/couchdb/local.ini
+      section=couchdb
+      option=view_index_dir
+      value=/mnt/couchdb
+
+ - name: bind to 0.0.0.0
+   ini_file: dest=/usr/local/etc/couchdb/local.ini
+      section=httpd
+      option=bind_address
+      value=0.0.0.0
+
+ - name: allow jsonp
+   ini_file: dest=/usr/local/etc/couchdb/local.ini
+      section=httpd
+      option=allow_jsonp
+      value=true
