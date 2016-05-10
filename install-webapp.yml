@@ -1,0 +1,39 @@
+ - name: install apache
+   apt: name=apache2
+   become: yes
+
+ - name: run apache proxy
+   command: a2enmod proxy
+   become: yes
+
+ - name: run apache http proxy
+   command: a2enmod proxy_http
+   become: yes
+
+ - name: install unzip
+   apt: name=unzip
+   become: yes
+
+ - name: create directory for webapp
+   file: path=/etc/webapp-tempspace state=directory
+
+ - name: get webapp
+   get_url: url=https://github.com/erwinfernandez92/CloudCom20WebApp/archive/master.zip dest=/etc/webapp-tempspace/webapp.zip
+
+ - name: extract webapp
+   unarchive: src=/etc/webapp-tempspace/webapp.zip dest=/etc/webapp-tempspace copy=no creates=/etc/webapp-tempspace/CloudCom20WebApp-master/README.md
+
+ - name: copy files into correct folder
+   shell: cp * /var/www/html/
+   args:
+      executable: /bin/bash
+      chdir: /etc/webapp-tempspace/CloudCom20WebApp-master
+
+ - name: copy new proxy conf
+   copy: src=proxy.conf dest=/etc/apache2/sites-enabled/000-default.conf 
+
+ - name: restart apache
+   shell: /etc/init.d/apache2 restart
+   args:
+      executable: /bin/bash
+

@@ -1,0 +1,29 @@
+ - name: install pip3
+   apt: name=python3-pip
+
+ - name: install unzip
+   apt: name=unzip
+   become: yes
+
+ - name: install venv
+   pip: name=virtualenv executable=pip3
+
+ - name: create directory for preprocessor
+   file: path=/etc/preprocessor-tempspace state=directory
+
+ - name: get preprocessor
+   get_url: url=https://github.com/erwinfernandez92/CloudCom20Preprocess/archive/master.zip dest=/etc/preprocessor-tempspace/preprocessor.zip
+
+ - name: extract preprocessor
+   unarchive: src=/etc/preprocessor-tempspace/preprocessor.zip dest=/etc/preprocessor-tempspace copy=no
+
+ - name: venving
+   command: virtualenv venv
+   args:
+      chdir: /etc/preprocessor-tempspace/CloudCom20Preprocess-master
+
+ - name: install geos
+   apt: name=libgeos-c1
+
+ - name: install requirements
+   pip: requirements=/etc/preprocessor-tempspace/CloudCom20Preprocess-master/requirements.txt virtualenv=/etc/preprocessor-tempspace/CloudCom20Preprocess-master/venv virtualenv_command=virtualenv
