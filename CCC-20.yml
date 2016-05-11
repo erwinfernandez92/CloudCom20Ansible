@@ -24,12 +24,14 @@
 
     - include: start-couch.yml
 
+    - name: wait for couch to start
+      pause: seconds=10
+
     - name: replicate tweet harvesters
-      command: curl -X POST http://127.0.0.1:5984/_replicate -d '{"source":"{{ item }}/raw_tweets", "target":"raw_tweets", "continuous":true}'
+      command: "curl -X POST -H \"Content-Type: application/json\" http://127.0.0.1:5984/_replicate -d '{\"source\":\"http://{{ item }}:5984/raw_tweets\", \"target\":\"raw_tweets\", \"continuous\":true}'"
       with_inventory_hostnames: tweet_harvester
 
-    #install preprocessor
-
+    - include: install-preprocessor.yml
 
  - hosts: webserver
    remote_user: debian
@@ -42,24 +44,11 @@
 
     - include: start-couch.yml
 
+    - name: wait for couch to start
+      pause: seconds=10
+
     - name: replicate polygons
-      command: curl -X POST http://127.0.0.1:5984/_replicate -d '{"source":"{{ item }}/tweets_polygons_relational", "target":"tweets_polygons_relational", "continuous":true}'
+      command: "curl -X POST  -H \"Content-Type: application/json\" http://127.0.0.1:5984/_replicate -d '{\"source\":\"http://{{ item }}:5984/tweets_polygons_relational\", \"target\":\"tweets_polygons_relational\", \"continuous\":true}'"
       with_inventory_hostnames: preprocessor
 
-    #install apache
-
- #we're going to be pulling
-
-#start tweets harvesters
-
-#copy over shapes
-
-#copy over raw_tweets
-
-#start preprocessor
-
-#set replicator
-
-#start web
-
-#set replicator
+    - include: install-webapp.yml

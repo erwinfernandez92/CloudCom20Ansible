@@ -79,7 +79,7 @@
  - file: path=/mnt/couchdb state=directory owner=couchdb group=couchdb recurse=yes mode=0775
    become: yes
 
- - file: path=/var/lib/couchdb state=directory
+ - file: path=/var/lib/couchdb state=directory owner=couchdb group=couchdb recurse=yes mode=0775
    become: yes
 
 #get and extract couchdb
